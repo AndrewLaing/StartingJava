@@ -1,0 +1,6 @@
+SALES RECEIPT
+Unit Price: £3.50
+Quantity: 5
+Subtotal: £17.50
+Sales Tax: £1.05
+Total: £18.55
