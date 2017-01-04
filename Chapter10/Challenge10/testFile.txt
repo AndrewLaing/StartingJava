@@ -1,0 +1,4 @@
+this is a    line
+of text for
+the program to count
+the words,of
