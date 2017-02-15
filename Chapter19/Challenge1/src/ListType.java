@@ -1,0 +1,294 @@
+import java.util.Iterator;
+
+/**
+ * Author: Andrew Laing
+ * Email:  parisianconnections@gmail.com
+ * Date:   02/02/2017.
+ */
+public class ListType<E> implements GenericList<E>,
+                                    Iterable<E>
+{
+    // Constants for the default capacity and resizing factor
+    private final int DEFAULT_CAPACITY = 10;
+    private final int RESIZE_FACTOR = 2;
+
+    // private fields
+    private E[] list;           // the list
+    private int elements;       // the number of elements stored
+
+
+    /**
+     * Default no-args Constructor
+     */
+    public ListType()
+    {
+        // this is necessary because we cannot instantiate an array of generic type
+        list = (E[]) (new Object[DEFAULT_CAPACITY]);
+        elements = 0;
+    }
+
+
+    /**
+     * Constructor that allows user to set the initial list size
+     * @param capacity
+     * @exception IllegalArgumentException When capacity is less than 1
+     */
+    public ListType(int capacity)
+    {
+        if (capacity < 1)
+            throw new IllegalArgumentException();
+
+        list = (E[]) (new Object[capacity]);
+        elements = 0;
+    }
+
+
+    /**
+     * Returns an iterator for this list
+     * @return an iterator
+     */
+    public Iterator<E> iterator()
+    {
+        // passing itself as the list to create an iterator for
+        return new ListTypeIterator<E>(this);
+    }
+
+
+    private void resize()
+    {
+        // Calculate the new length which is the current length
+        // multiplied by the resize factor
+        int newLength = list.length * RESIZE_FACTOR;
+
+        // create a new list
+        E[] tempList = (E[]) (new Object[newLength]);
+
+        // copy the existing elements to the new list
+        for(int index=0; index<elements; index++)
+            tempList[index] = list[index];
+
+        // replace the existing list with the new one
+        list = tempList;
+    }
+
+    @Override
+    public void add(E element)
+    {
+        // if the list is full resize it
+        if(elements==list.length)
+            resize();
+
+        // add str to the end of the list
+        list[elements] = element;
+
+        // adjust the number of elements
+        elements++;
+    }
+
+    @Override
+    public void add(int index, E element)
+    {
+        // if the list is full resize it
+        if(index > elements || index < 0)
+            throw new IndexOutOfBoundsException();
+
+        // if the list is full resize it
+        if(elements==list.length)
+            resize();
+
+        // shift the elements starting at index to the right one position
+        for(int index2 = elements; index2 > index; index2--)
+            list[index2] = list[index2 - 1];
+
+        // add the new element at index
+        list[index] = element;
+
+        // adjust the number of elements
+        elements++;
+    }
+
+
+    /**
+     * The method append appends the contents of the list passed to it
+     * to the end of the list
+     * @param obj2
+     */
+    public void append(ListType<E> obj2)
+    {
+        for(E element : obj2)
+        {
+            add(element);
+        }
+    }
+
+
+
+    @Override
+    public void clear()
+    {
+        for(int index=0; index < elements; index++)
+            list[index] = null;
+
+        elements = 0;
+
+    }
+
+    @Override
+    public boolean contains(E element)
+    {
+        int index = 0;
+        boolean found = false;
+
+        while(!found && index < elements)
+        {
+            if(list[index].equals(element))
+                found = true;
+            index++;
+        }
+
+        // return the status of the search
+        return found;
+    }
+
+    @Override
+    public E get(int index)
+    {
+        if(index > elements || index < 0)
+            throw new IndexOutOfBoundsException();
+        return list[index];
+    }
+
+    @Override
+    public int indexOf(E element)
+    {
+        int index = 0;
+        boolean found = false;
+
+        while(!found && index < elements)
+        {
+            if(list[index].equals(element))
+                found = true;
+            else
+                index++;
+        }
+
+        if(!found)
+            index = -1;
+
+        // return the status of the search
+        return index;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return (elements == 0);
+    }
+
+    @Override
+    public boolean remove(E element)
+    {
+        int index = 0;
+        boolean found = false;
+
+        while(!found && index < elements)
+        {
+            if(list[index].equals(element))
+                found = true;
+            index++;
+        }
+
+        // if the value was found shift all subsequent values toward
+        // the front of the list
+        if(found)
+        {
+            while(index < elements)
+            {
+                list[index - 1] = list[index];
+                index++;
+            }
+
+            // adjust the number of elements
+            elements--;
+        }
+
+        // return the status of the search
+        return found;
+    }
+
+    @Override
+    public E remove(int index)
+    {
+        if(index >= elements || index < 0)
+            throw new IndexOutOfBoundsException();
+
+        // save the string but remove it from the list
+        E temp = list[index];
+        list[index] = null;
+        index++;
+
+        while(index < elements)
+        {
+            list[index - 1] = list[index];
+            index++;
+        }
+
+        // adjust the number of elements
+        elements--;
+
+        // return the string that was removed
+        return temp;
+    }
+
+
+    /**
+     * This version of the remove method remove any items that appear in obj and list
+     * from list
+     * @param obj2
+     */
+    public void remove(ListType<E> obj2)
+    {
+        for(E element : obj2)
+        {
+            remove(element);
+        }
+    }
+
+
+    @Override
+    public E set(int index, E element) {
+        if(index >= elements || index < 0)
+            throw new IndexOutOfBoundsException();
+
+        // save the string but remove it from the list
+        E temp = list[index];
+
+        // replace the string with str
+        list[index] = element;
+
+        // return the previously stored string
+        return temp;
+    }
+
+    @Override
+    public int size() {
+        return elements;
+    }
+
+    /**
+     * The method toStringArray converts the list to a string array
+     * @return a string array representing the list
+     */
+    public String[] toStringArray()
+    {
+        // create a string array large enough to hold all of the elements in the list
+        String[] strArray = new String[elements];
+
+        // store each elements toString() return value as an element in the array
+        for(int index=0; index<elements; index++)
+            strArray[index]=list[index].toString();
+
+        // return the string array
+        return strArray;
+    }
+
+}
