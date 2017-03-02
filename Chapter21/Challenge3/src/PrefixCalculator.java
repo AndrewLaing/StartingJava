@@ -64,7 +64,13 @@ public class PrefixCalculator
         {
             op = operatorGenStack.pop();
 
-            if(resultGenStack.size()<2) {
+            if(resultGenStack.size()==1 && operandGenStack.size()==1)
+            {
+                a = operandGenStack.pop();
+                b = resultGenStack.pop();
+            }
+            else if(resultGenStack.size()<2)
+            {
                 b = operandGenStack.pop();
                 a = operandGenStack.pop();
             }
