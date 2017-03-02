@@ -1,7 +1,7 @@
 /**
  * Author: Andrew Laing
  * Email:  parisianconnections@gmail.com
- * Date:   19/02/2017.
+ * Date:   02/03/2017.
  */
 
 import java.util.Scanner;   // for parsing the expression
@@ -11,87 +11,24 @@ public class PrefixCalculator
     // The stacks used to hold the operators and operands
     GenLinkedStack<Character> operatorGenStack = new GenLinkedStack<Character>();
     GenLinkedStack<Integer> operandGenStack = new GenLinkedStack<Integer>();
-
     GenLinkedStack<Integer> resultGenStack = new GenLinkedStack<Integer>();
 
     public PrefixCalculator()
     {
-
     }
 
 
     /**
-     * The canEvaluateExpression determines whether there are enough
-     * operands on the operand stack to perform an operation.
-     * @return true if there are enough operands on the operand stack
-     *         to perform an operation, otherwise false.
+     * The parseExpression method reads a prefix expression and pushes
+     * the extracted operators and operands to stacks
+     * @param expression A prefix expression to parse
+     * @return true if expression was parsed, otherwise false
      */
-    private boolean canEvaluateExpression()
+    public boolean parseExpression(String expression)
     {
-        boolean result = false;
-        if ( (operandGenStack.size()==2) && operatorGenStack.size()>0)
-            result = true;
-        //else if(operatorGenStack.size() > 1 && operandGenStack.size()>1)
-        //    result = true;
-        return result;
-    }
+        if(expression.length()==0)
+            return false;
 
-
-    /**
-     * The addition method pops two values from the operand stack
-     * adds them together, and pushes the result to the operand stack.
-     */
-    private void addition(int a, int b)
-    {
-        resultGenStack.push(a + b);
-    }
-
-
-    /**
-     * The multiplication method pops two values from the operand stack
-     * multiplies them together, and pushes the result to the
-     * operand stack
-     */
-    private void multiplication(int a, int b)
-    {
-        resultGenStack.push(a * b);
-    }
-
-
-    /**
-     * The evaluateSubExpression method determines which operation
-     * to perform. The operation is then performed and the result
-     * is pushed to the operand stack.
-     */
-    private void evaluateSubExpression(int a, int b)
-    {
-        int result;
-        char operator = operatorGenStack.pop();
-        switch(operator)
-        {
-            case '+':
-                addition(a, b);
-                break;
-            case '*':
-                multiplication(a, b);
-                break;
-            default:
-                throw new IllegalOperatorException();
-        }
-    }
-
-
-    private void clearStacks()
-    {
-        operandGenStack.clear();
-        operatorGenStack.clear();
-        resultGenStack.clear();
-    }
-
-
-
-    public int parseExpression(String expression)
-    {
         // Create a Scanner object to parse the expression
         Scanner sc = new Scanner(expression);
         int tempInt;
@@ -107,29 +44,53 @@ public class PrefixCalculator
                 tempChar = sc.next().charAt(0);
                 operatorGenStack.push(tempChar);
             }
-
-            if(canEvaluateExpression())
-                evaluateSubExpression(operandGenStack.pop(),operandGenStack.pop());
-
-            if(resultGenStack.size() > 1)
-                evaluateSubExpression(resultGenStack.pop(),resultGenStack.pop());
         }
 
-        // This is a case where a value was entered without an operator
-        if(operandGenStack.size()==1)
-            resultGenStack.push(operandGenStack.pop());
+        return !operandGenStack.empty() && (operandGenStack.size()>operatorGenStack.size());
+    }
 
-        int result;
 
-        // Get the result
-        if(resultGenStack.size()==1)
-            result = resultGenStack.pop();
-        else {
-            clearStacks();
-            throw new InvalidPrefixExpressionException();
+    /**
+     * The calculateResult method calculates the result from the
+     * prefix expression pushed into the two stacks
+     * @return The result of a prefix expression
+     */
+    public int calculateResult()
+    {
+        char op;
+        int a, b;
+
+        while(!operatorGenStack.empty())
+        {
+            op = operatorGenStack.pop();
+
+            if(resultGenStack.size()<2) {
+                b = operandGenStack.pop();
+                a = operandGenStack.pop();
+            }
+            else
+            {
+                a = resultGenStack.pop();
+                b = resultGenStack.pop();
+            }
+
+            switch(op)
+            {
+                case '+':
+                    resultGenStack.push(a+b);
+                    break;
+                case '*':
+                    resultGenStack.push(a*b);
+                    break;
+                default:
+                    throw new IllegalOperatorException();
+            }
+
         }
 
-        clearStacks();
-        return result;
+        if(!operandGenStack.empty())
+            return operandGenStack.pop();
+
+        return resultGenStack.pop();
     }
 }
