@@ -1,7 +1,7 @@
 /**
  * Author: Andrew Laing
  * Email:  parisianconnections@gmail.com
- * Date:   20/02/2017.
+ * Date:   02/03/2017.
  */
 
 import java.awt.event.*;
@@ -61,12 +61,15 @@ public class GUIPrefixCalculator extends JFrame
     {
         public void actionPerformed(ActionEvent e)
         {
-            int result;
+            int result = 0;
             String expression = expressionEntryTextField.getText();
 
-            result = pCalc.parseExpression(expression);
-
-            resultTextField.setText(expression + " = " + result);
+            if(pCalc.parseExpression(expression)) {
+                result = pCalc.calculateResult();
+                resultTextField.setText(expression + " = " + result);
+            } else {
+                resultTextField.setText("Invalid expression ");
+            }
             pack();
             expressionEntryTextField.setText("");
         }
